@@ -1,0 +1,919 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>Bilan Bêtes de scène</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700&family=Newsreader:opsz,wght@6..72,500;6..72,700&display=swap">
+<style>
+/* Même structure que le bilan de l'unité 1 : une colonne étroite, des cartes nettes, un retour immédiat. */
+:root {
+  color-scheme: light;
+  box-sizing: border-box;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  --bg: #f4f5f1;
+  --surface: #ffffff;
+  --fg: #1c2430;
+  --muted: #5b6676;
+  --line: #d6dad2;
+  --accent: #2f5d8a;
+  --accent-fg: #ffffff;
+  --ok: #2a7a5c;
+  --ko: #b0402b;
+  --ok-bg: #e3f1eb;
+  --ko-bg: #f7e5e0;
+  --display: "Newsreader", Georgia, "Times New Roman", serif;
+  --body: "Figtree", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131a22; --surface: #1c2530; --fg: #e8ebef; --muted: #a3adbb;
+    --line: #2f3b4a; --accent: #8fb6de; --accent-fg: #101820;
+    --ok: #7fd1ae; --ko: #f29b84; --ok-bg: #1d3a2e; --ko-bg: #3e2420;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131a22; --surface: #1c2530; --fg: #e8ebef; --muted: #a3adbb;
+  --line: #2f3b4a; --accent: #8fb6de; --accent-fg: #101820;
+  --ok: #7fd1ae; --ko: #f29b84; --ok-bg: #1d3a2e; --ko-bg: #3e2420;
+  color-scheme: dark;
+}
+body {
+  margin: 0;
+  padding: 24px max(16px, env(safe-area-inset-right, 0px)) 40px max(16px, env(safe-area-inset-left, 0px));
+  background: var(--bg);
+  color: var(--fg);
+  font: 15px/1.55 var(--body);
+}
+.wrap { max-width: 680px; margin: 0 auto; }
+header { margin-bottom: 20px; }
+.kicker { margin: 0 0 4px; color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+h1 { margin: 0 0 8px; font: 500 2.1rem/1.15 var(--display); text-wrap: balance; }
+.lede { margin: 0; color: var(--muted); max-width: 52ch; }
+h2 { margin: 0 0 4px; font: 500 1.6rem/1.2 var(--display); }
+.rule { margin: 0 0 16px; color: var(--muted); max-width: 60ch; }
+
+.menu { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.tile {
+  text-align: left; cursor: pointer; font: inherit; color: var(--fg);
+  background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+  padding: 16px; min-width: 0;
+}
+.tile strong { display: block; font: 500 1.15rem/1.25 var(--display); margin-bottom: 4px; }
+.tile span { color: var(--muted); font-size: 14px; }
+.tile:hover { border-color: var(--accent); }
+
+.play-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+.score { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 14px; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px; }
+.prompt { margin: 0; font: 500 1.35rem/1.5 var(--display); text-wrap: pretty; }
+.choices { display: grid; gap: 8px; margin-top: 16px; }
+button.choice {
+  text-align: left; font: inherit; color: var(--fg); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 10px; padding: 11px 14px; cursor: pointer;
+}
+button.choice:hover:not(:disabled) { border-color: var(--accent); }
+button.choice.right { border-color: var(--ok); background: var(--ok-bg); }
+button.choice.wrong { border-color: var(--ko); background: var(--ko-bg); }
+button.choice:disabled { cursor: default; }
+
+.answer { display: flex; gap: 8px; margin-top: 16px; flex-wrap: wrap; }
+.answer input {
+  flex: 1 1 180px; min-width: 0; font: inherit; color: var(--fg); background: var(--bg);
+  border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px;
+}
+.answer input:disabled { opacity: .75; }
+
+.feedback { min-height: 1.6em; margin-top: 14px; }
+.feedback.good { color: var(--ok); }
+.feedback.bad { color: var(--ko); }
+
+.actions { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+button.primary {
+  background: var(--accent); color: var(--accent-fg); border: 0; border-radius: 10px;
+  padding: 10px 16px; font: inherit; font-weight: 600; cursor: pointer;
+}
+button.ghost {
+  background: transparent; color: var(--accent); border: 1px solid var(--line); border-radius: 10px;
+  padding: 9px 14px; font: inherit; font-weight: 600; cursor: pointer;
+}
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.foot { margin-top: 24px; color: var(--muted); font-size: 13px; }
+.tabs { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+.tab {
+  font: inherit; font-weight: 600; padding: 9px 16px; border-radius: 999px; cursor: pointer;
+  background: transparent; color: var(--muted); border: 1px solid var(--line);
+}
+.tab[aria-selected="true"] { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+.film { margin: 22px 0 10px; font: 500 1.2rem/1.3 var(--display); }
+.story { margin: 0; font: 1.05rem/2 var(--body); text-wrap: pretty; }
+.cloze select {
+  font: inherit; color: var(--fg); background: var(--bg); border: 1px solid var(--line);
+  border-radius: 8px; padding: 2px 6px; margin: 0 2px;
+}
+.cloze select.right { border-color: var(--ok); background: var(--ok-bg); }
+.cloze select.wrong { border-color: var(--ko); background: var(--ko-bg); }
+.cloze button.primary { margin-top: 16px; }
+</style>
+
+<main class="wrap">
+  <header>
+    <p class="kicker">Bilan · Unité 4 · B1</p>
+    <h1>Bilan Bêtes de scène</h1>
+    <p class="lede">Choisis un thème et entraîne-toi autant que tu veux. Les phrases changent à chaque question.</p>
+  </header>
+
+  <div id="menu-wrap">
+    <div class="tabs" role="tablist">
+      <button id="t-themes" class="tab" type="button" role="tab" aria-selected="true">Thèmes</button>
+      <button id="t-extraits" class="tab" type="button" role="tab" aria-selected="false">Extraits étudiés</button>
+    </div>
+    <div id="tab-themes"><div id="grid-themes" class="menu"></div></div>
+    <div id="tab-extraits" hidden><div id="grid-extraits"></div></div>
+  </div>
+
+  <section id="play" hidden>
+    <div class="play-head">
+      <button id="back" class="ghost" type="button">← Tous les thèmes</button>
+      <span id="score" class="score"></span>
+    </div>
+    <h2 id="mode-title"></h2>
+    <p id="rule" class="rule"></p>
+
+    <div class="card">
+      <p id="prompt" class="prompt" aria-live="polite"></p>
+      <div id="choices" class="choices" hidden></div>
+      <form id="form" class="answer" autocomplete="off">
+        <input id="input" aria-label="Ta réponse">
+        <button class="primary" type="submit">Vérifier</button>
+      </form>
+      <div id="feedback" class="feedback" role="status" aria-live="polite"></div>
+    </div>
+
+    <div class="actions">
+      <button id="listen" class="ghost" type="button" hidden>Écouter</button>
+      <button id="next" class="primary" type="button" hidden>Question suivante</button>
+    </div>
+  </section>
+
+  <p class="foot">Pas de limite : tu peux refaire un thème autant de fois que tu veux.</p>
+</main>
+
+<script>
+/* ---------- Outils ---------- */
+const el = id => document.getElementById(id);
+const cap = s => s.charAt(0).toUpperCase() + s.slice(1);
+const norm = s => String(s).toLowerCase().replace(/[’`]/g, "'").replace(/\s+/g, ' ').trim();
+const pick = a => a[Math.floor(Math.random() * a.length)];
+const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+/* Tirage d'une question à choix : une bonne réponse et des distracteurs. */
+function choiceGen(prompt, ok, d, explain, nd = 2) {
+  const opts = shuffle([pick(ok), ...shuffle(d).slice(0, nd)]);
+  return { prompt, options: opts, check: v => ok.includes(v), explain, answerText: ok.join(' ou ') };
+}
+
+/* ---------- 1. Gérondif et participe présent (saisie) ---------- */
+const GER = [
+  { p: 'Elle écoute la radio ___ (faire) la cuisine.', a: 'en faisant', e: 'Gérondif : « en » + participe présent. Il exprime la simultanéité.' },
+  { p: 'Il lit le journal ___ (boire) son café.', a: 'en buvant', e: 'Gérondif : « en » + participe présent. Ici, les deux actions sont en même temps.' },
+  { p: 'Nous avons appris beaucoup de choses ___ (lire) des livres.', a: 'en lisant', e: 'Gérondif : il exprime le moyen ou la manière.' },
+  { p: 'Il est tombé ___ (courir) dans le couloir.', a: 'en courant', e: 'Gérondif : il exprime la manière ou la circonstance.' },
+  { p: 'Les spectateurs, ___ (applaudir), se sont levés.', a: 'applaudissant', e: 'Participe présent sans « en » : il remplace « qui applaudissaient ». Il est invariable.' },
+  { p: 'Un acteur ___ (jouer) dans ce film a reçu un prix.', a: 'jouant', e: 'Participe présent : il remplace « qui joue ».' },
+  { p: '___ (être) fatigué, il est rentré tôt.', a: 'étant', e: 'Participe présent irrégulier de « être ». Il exprime la cause.' },
+  { p: '___ (savoir) la réponse, elle a levé la main.', a: 'sachant', e: 'Participe présent irrégulier de « savoir ».' },
+  { p: 'Les enfants ___ (jouer) dans le jardin ont crié.', a: 'jouant', e: 'Participe présent : il décrit les enfants, comme une relative.' },
+  { p: 'Elle a découvert ce restaurant ___ (se promener) dans le quartier.', a: 'en se promenant', e: 'Gérondif d’un verbe pronominal : « en se promenant ».' }
+];
+function genGer() {
+  const it = pick(GER);
+  return { prompt: it.p, check: v => norm(v) === norm(it.a), answerText: it.a, explain: it.e };
+}
+
+/* ---------- 2. Plus-que-parfait (saisie, généré) ---------- */
+const PQP_VERBS = [
+  { inf: 'partir', pp: 'parti', aux: 'être' }, { inf: 'arriver', pp: 'arrivé', aux: 'être' },
+  { inf: 'sortir', pp: 'sorti', aux: 'être' }, { inf: 'voir', pp: 'vu', aux: 'avoir' },
+  { inf: 'prendre', pp: 'pris', aux: 'avoir' }, { inf: 'lire', pp: 'lu', aux: 'avoir' },
+  { inf: 'manger', pp: 'mangé', aux: 'avoir' }, { inf: 'finir', pp: 'fini', aux: 'avoir' }
+];
+const PQP_OBJ = ['le film', 'le spectacle', 'la série', 'le concert', 'le cirque'];
+const PQP_CTX = ['Quand nous sommes arrivés au cinéma,', 'Quand je suis rentré,', 'Hier soir, quand j’ai allumé la télé,', 'Quand le rideau s’est levé,'];
+function genPqp() {
+  const v = pick(PQP_VERBS);
+  const s = pick(['il', 'elle', 'ils', 'elles']);
+  const fem = s === 'elle' || s === 'elles';
+  const pl = s === 'ils' || s === 'elles';
+  const aux = v.aux === 'avoir'
+    ? (pl ? 'avaient' : 'avait')
+    : (pl ? 'étaient' : 'était');
+  let pp = v.pp;
+  if (v.aux === 'être') { if (fem) pp += 'e'; if (pl && !pp.endsWith('s')) pp += 's'; }
+  const ans = `${aux} ${pp}`;
+  const subj = { il: 'Il', elle: 'Elle', ils: 'Ils', elles: 'Elles' }[s];
+  return {
+    prompt: `${pick(PQP_CTX)} ${s} ___ (${v.inf}) ${pick(PQP_OBJ)}.`,
+    check: x => norm(x) === norm(ans),
+    answerText: ans,
+    explain: 'Plus-que-parfait : imparfait de « avoir » ou « être » + participe passé. Il marque une action qui a eu lieu avant une autre action du passé.'
+  };
+}
+
+/* ---------- 3. Dont (choix) ---------- */
+const DONT = [
+  { p: 'C’est le spectacle ___ je me souviens depuis dix ans.', ok: ['dont'], d: ['que', 'où'], e: '« Se souvenir de » demande « de » : on utilise « dont ».' },
+  { p: 'Voici le film ___ tout le monde parle en ce moment.', ok: ['dont'], d: ['que', 'où'], e: '« Parler de » demande « de » : on utilise « dont ».' },
+  { p: 'C’est la chanteuse ___ je connais le répertoire.', ok: ['dont'], d: ['que', 'où'], e: '« Connaître le répertoire de » : « dont ».' },
+  { p: 'C’est le cirque ___ la ville est fière.', ok: ['dont'], d: ['que', 'où'], e: '« Être fier de » : « dont ».' },
+  { p: 'C’est le spectacle ___ on parle dans le journal.', ok: ['dont'], d: ['que', 'où'], e: '« Parler de » : « dont ».' },
+  { p: 'Voici les jongleurs ___ je connais les numéros.', ok: ['dont'], d: ['que', 'qui'], e: '« Connaître les numéros de » : « dont ».' },
+  { p: 'C’est une série ___ j’ai entendu le titre.', ok: ['dont'], d: ['que', 'où'], e: '« Entendre le titre de » : « dont ».' },
+  { p: 'C’est l’acteur ___ la voix est magnifique.', ok: ['dont'], d: ['que', 'qui'], e: 'Dont + possessif : « dont la voix est magnifique » (la voix de l’acteur).' },
+  { p: 'Le film ___ tu m’as parlé est sorti hier.', ok: ['dont'], d: ['que', 'où'], e: '« Parler de » : « dont ».' },
+  { p: 'C’est la chanson ___ je me souviens du refrain.', ok: ['dont'], d: ['que', 'où'], e: '« Se souvenir de » : « dont ».' },
+];
+function genDont() { const it = pick(DONT); return choiceGen(it.p, it.ok, it.d, it.e, 2); }
+
+/* ---------- 4. Vocabulaire du spectacle et du cinéma (choix) ---------- */
+const VOC_SPEC = [
+  { p: 'Un artiste qui marche sur un fil est un ___.', ok: ['funambule'], d: ['dompteur', 'jongleur', 'clown'], e: 'Le funambule marche sur un fil tendu.' },
+  { p: 'Une personne qui dresse des animaux est un ___.', ok: ['dompteur'], d: ['funambule', 'jongleur'], e: 'Le dompteur travaille avec les animaux du cirque.' },
+  { p: 'Un artiste qui fait tourner des objets en l’air est un ___.', ok: ['jongleur'], d: ['clown', 'dompteur'], e: 'Le jongleur lance et rattrape des objets.' },
+  { p: 'Le grand toit de toile d’un cirque s’appelle le ___.', ok: ['chapiteau'], d: ['balcon', 'guichet'], e: 'Le chapiteau est la grande tente du cirque.' },
+  { p: '« Se divertir » veut dire…', ok: ['s’amuser, passer un bon moment'], d: ['s’endormir', 'se fâcher'], e: 'Se divertir, c’est s’amuser et oublier ses soucis.' }
+];
+const VOC_CINE = [
+  { p: '« Divulgâcher » veut dire…', ok: ['révéler la fin d’une histoire'], d: ['acheter un billet', 'critiquer un acteur'], e: 'Divulgâcher, c’est dévoiler l’intrigue ou la fin avant les autres.' },
+  { p: '« Choisir au pif » veut dire…', ok: ['choisir au hasard'], d: ['choisir avec soin', 'choisir en groupe'], e: 'Au pif = au hasard, sans réfléchir.' },
+  { p: 'Une série est divisée en saisons, et chaque saison en ___.', ok: ['épisodes'], d: ['chapitres', 'scènes'], e: 'On parle d’épisodes pour une série télévisée.' },
+  { p: 'Les Trois Mousquetaires est un film de cape et ___.', ok: ['d’épée'], d: ['de sabre', 'd’armure'], e: 'Film de cape et d’épée : le mot est « épée ».' },
+  { p: 'Être ___ dans son canapé, c’est être installé mollement, sans énergie.', ok: ['affalé'], d: ['assis', 'couché'], e: 'Être affalé : être vautré, détendu, sans bouger.' }
+];
+function genVocSpec() { const it = pick(VOC_SPEC); return choiceGen(it.p, it.ok, it.d, it.e); }
+function genVocCine() { const it = pick(VOC_CINE); return choiceGen(it.p, it.ok, it.d, it.e); }
+
+/* ---------- 5. Connecteurs (choix) ---------- */
+const CONN = [
+  { p: '___, je suis resté à la maison.  (= parce qu’il pleuvait)', ok: ['Comme il pleuvait'], d: ['Parce qu’il pleuvait', 'Quand il pleuvait'], e: '« Comme » remplace « parce que » en début de phrase.' },
+  { p: '___ je suis arrivé, tout le monde dormait.  (= quand)', ok: ['Lorsque'], d: ['Parce que', 'Soudain'], e: '« Lorsque » remplace « quand » (temps).' },
+  { p: 'Soudainement → ___', ok: ['tout à coup'], d: ['parce que', 'lorsque'], e: '« Tout à coup » a le même sens que « soudainement ».' }
+];
+function genConn() { const it = pick(CONN); return choiceGen(it.p, it.ok, it.d, it.e); }
+
+/* ---------- 6. Proposer et donner son avis (choix) ---------- */
+const PROP = [
+  { p: 'Pour proposer une sortie à un ami, je dis :', ok: ['Si ça te tente, on pourrait aller voir un spectacle ?'], d: ['Tu es nul.', 'Je ne veux pas.'], e: '« Si ça te tente » et « on pourrait » servent à proposer.' },
+  { p: 'Pour proposer un programme à un groupe, je dis :', ok: ['Je vous propose une soirée au théâtre.'], d: ['Vous devez venir.', 'J’ai réservé pour vous, c’est obligatoire.'], e: '« Je vous propose » introduit une proposition de façon polie.' }
+];
+const AVIS = [
+  { p: 'Quelle appréciation est négative ?', ok: ['C’est un navet.'], d: ['C’est magnifique.', 'C’est passionnant.'], e: '« Un navet » : un film très mauvais.' },
+  { p: 'Quelle appréciation est positive ?', ok: ['C’est bouleversant.'], d: ['C’est choquant.', 'C’est ennuyant.'], e: '« Bouleversant » : qui touche très fort.' },
+  { p: '« Ça me laisse froid » veut dire…', ok: ['je suis indifférent'], d: ['je suis très ému', 'je suis furieux'], e: 'Ça me laisse froid = je ne suis pas touché.' }
+];
+function genProp() { const it = pick(PROP); return choiceGen(it.p, it.ok, it.d, it.e); }
+function genAvis() { const it = pick(AVIS); return choiceGen(it.p, it.ok, it.d, it.e); }
+
+/* ---------- 7. Texte à trous ---------- */
+const CLOZE = [
+  'Hier soir, nous {{sommes allés|allions}} au cirque. Quand nous {{sommes arrivés|arrivions}}, le spectacle {{avait déjà commencé|commençait}}. Il {{faisait|a fait}} très froid sous le chapiteau, mais le public {{riait|a ri}} sans arrêt.',
+  'Le film {{était|a été}} magnifique : l’héroïne {{avait vécu|vivait}} une aventure incroyable avant de rentrer chez elle. Quand la série {{est sortie|sortait}} en 2020, tout le monde en {{parlait|a parlé}} pendant des mois.',
+  'Samedi dernier, Léa est allée au théâtre avec ses amis. Quand ils sont arrivés, la pièce {{avait déjà commencé|commençait}}. Léa {{avait oublié|oubliait}} ses billets à la maison, alors elle {{a dû|devait}} retourner les chercher. Elle {{avait promis|promettait}} à ses amis d’être à l’heure, mais le métro {{était tombé|tombait}} en panne.',
+  'Quand {{j’ai allumé|j’allumais}} la télé, le film {{avait déjà commencé|commençait}}. Il {{faisait|a fait}} nuit et je {{me suis installé|m’installais}} dans mon canapé. Au bout d’une heure, je {{m’étais endormi|me suis endormi}}.'
+];
+function parseCloze(src) {
+  const parts = [];
+  const re = /\{\{([^}]+)\}\}/g;
+  let last = 0, m;
+  while ((m = re.exec(src))) {
+    parts.push(src.slice(last, m.index));
+    const [ok, alt] = m[1].split('|');
+    parts.push({ ok, alt });
+    last = re.lastIndex;
+  }
+  parts.push(src.slice(last));
+  return parts;
+}
+function genCloze() {
+  return {
+    cloze: true,
+    prompt: 'Lis le récit. Dans chaque liste, choisis la forme juste.',
+    parts: parseCloze(pick(CLOZE)),
+    explain: 'Imparfait : décor et descriptions. Passé composé : actions précises. Plus-que-parfait : action antérieure.'
+  };
+}
+
+/* ---------- Extraits étudiés (éloge d'un artiste) ---------- */
+const ELOGE = [
+  { p: 'Une voix ___ : une voix rare, hors du commun.', ok: ['exceptionnelle'], d: ['ordinaire', 'banale'], e: 'Exceptionnel = unique, hors du commun.' },
+  { p: 'Une figure ___ d’un domaine : un symbole.', ok: ['icône'], d: ['figurant', 'spectateur'], e: 'Une icône, c’est un symbole, une figure représentative.' },
+  { p: 'Un album qui ___ l’époque : il la marque pour longtemps.', ok: ['marquera'], d: ['oubliera', 'cachera'], e: 'Marquer l’époque = laisser une trace importante.' },
+  { p: 'Un ___ intense et unique pour une ville.', ok: ['grand amour'], d: ['petit ennui', 'simple passage'], e: 'Un grand amour : un attachement très fort.' }
+];
+const CRITIQUE = [
+  { p: 'Une critique ___ dit du bien d’un film.', ok: ['positive'], d: ['négative', 'neutre'], e: 'Une critique positive exprime un avis favorable.' },
+  { p: 'Pour faire l’éloge d’un artiste, on dit :', ok: ['C’est un artiste exceptionnel, inoubliable.'], d: ['C’est un navet.', 'Ça me laisse de glace.'], e: 'Un éloge exprime une appréciation très positive.' }
+];
+function genEloge() { const it = pick(ELOGE); return choiceGen(it.p, it.ok, it.d, it.e); }
+function genCritique() { const it = pick(CRITIQUE); return choiceGen(it.p, it.ok, it.d, it.e); }
+
+/* ---------- Modes ---------- */
+const MODES = [
+  { title: 'Gérondif ou participe présent', desc: 'Écris la forme juste.', kind: 'input', gen: genGer,
+    rule: 'Le gérondif = « en » + participe présent. Le participe présent est invariable et remplace souvent une relative.' },
+  { title: 'Plus-que-parfait', desc: 'Forme l’action antérieure.', kind: 'input', gen: genPqp,
+    rule: 'Imparfait de avoir ou être + participe passé. Pour une action qui a eu lieu avant une autre action du passé.' },
+  { title: 'Le pronom dont', desc: 'Dont ou avec qui ?', kind: 'choice', gen: genDont,
+    rule: 'Dont remplace « de + nom » : il suit toujours une expression construite avec « de ».' },
+  { title: 'Pronoms relatifs : qui, que, où', desc: 'Consolidation.', kind: 'choice', gen: genRel,
+    rule: 'Qui = sujet du verbe qui suit ; que = complément direct ; où = lieu ou moment.' },
+  { title: 'Qui, que, où ou dont ?', desc: 'Les quatre pronoms mélangés.', kind: 'choice', gen: genRelMix,
+    rule: 'Qui = sujet. Que = complément direct. Où = lieu ou moment. Dont = remplace « de + nom » (parler de, être fan de, avoir besoin de…).' },
+  { title: 'Texte à trous : pronoms relatifs', desc: 'Qui, que, où, dont dans un texte.', kind: 'cloze', gen: genRelCloze,
+    rule: 'Lis le texte et choisis le pronom relatif juste dans chaque liste.' },
+  { title: 'Écoute : quel temps ?', desc: 'Imparfait, passé composé, plus-que-parfait.', kind: 'choice', gen: genAudioTemps,
+    rule: 'Clique sur « Écouter ». Le texte reste caché jusqu’à la correction.' },
+  { title: 'Dictée à l’écoute', desc: 'Écoute et écris la phrase.', kind: 'input', gen: genDictee,
+    rule: 'Clique sur « Écouter » autant de fois que tu veux, puis écris la phrase.' },
+  { title: 'Discriminer -ant / -ons', desc: '[ɑ̃] ou [ɔ̃] ? Écoute et choisis.', kind: 'choice', gen: genPhonAnt,
+    rule: 'Clique sur « Écouter », puis choisis la terminaison entendue : -ant = [ɑ̃], -ons = [ɔ̃].' },
+  { title: 'Discriminer dans / dont', desc: 'Les sons [ɑ̃] et [ɔ̃].', kind: 'choice', gen: genDansDont,
+    rule: 'Clique sur « Écouter », puis reconnais le mot entendu.' },
+  { title: 'Le spectacle', desc: 'Cirque et scène.', kind: 'choice', gen: genVocSpec,
+    rule: 'Vocabulaire des arts de la scène et du cirque.' },
+  { title: 'Cinéma et séries', desc: 'Films, séries, avis.', kind: 'choice', gen: genVocCine,
+    rule: 'Vocabulaire du cinéma et des séries.' },
+  { title: 'Connecteurs de cause et de temps', desc: 'Comme, lorsque, étant donné que, tout à coup.', kind: 'choice', gen: genConnAll,
+    rule: 'Trouve le connecteur ou la forme équivalente. Les connecteurs de cause et de temps changent la construction, pas le sens.' },
+  { title: 'Proposer une sortie', desc: 'Inviter et proposer.', kind: 'choice', gen: genProp,
+    rule: 'Formules pour proposer un programme culturel.' },
+  { title: 'Donner son avis', desc: 'Positif ou négatif.', kind: 'choice', gen: genAvis,
+    rule: 'Appréciations positives et négatives.' },
+  { title: 'Texte à trous : temps du passé', desc: 'Imparfait, passé composé, plus-que-parfait.', kind: 'cloze', gen: genCloze,
+    rule: 'Lis le récit et choisis, dans chaque liste, la bonne forme.' },
+  { title: 'Lexique du cirque et du corps', desc: 'Vu en classe le 29/10.', kind: 'choice', gen: genLexCirque,
+    rule: 'Mots du cirque, expressions de la classe et verbes du mouvement.' },
+  { title: 'Verbes du mouvement et du corps', desc: 'Grimper, sauter, tourner…', kind: 'choice', gen: genLexCorps,
+    rule: 'Trouve le verbe qui correspond à l’action.' },
+  { title: 'Séries et cinéma (notes de classe)', desc: 'Épisodes, sortie, divulgâcher.', kind: 'choice', gen: genLexSeries,
+    rule: 'Vocabulaire vu en classe le 05/11.' },
+  { title: 'Réactiver le lexique', desc: 'Écris le mot à partir de sa définition.', kind: 'input', gen: genLexRappel,
+    rule: 'Tape le mot, sans l’aide des listes.' },
+  { title: 'Français familier et argot', desc: 'Mortel, bof, au pif, un navet.', kind: 'choice', gen: genArgot,
+    rule: 'Ces expressions sont familières : on les entend à l’oral entre amis, mais on ne les écrit pas dans un texte formel.' }
+];
+/* ---------- Pronoms relatifs simples : qui, que, où ---------- */
+const REL = [
+  { p: 'C’est le film ___ m’a fait pleurer.', ok: ['qui'], e: '« Qui » remplace le sujet du verbe qui suit : « qui m’a fait pleurer ».' },
+  { p: 'C’est la série ___ je regarde chaque soir.', ok: ['que'], e: '« Que » remplace le complément direct : « je regarde la série ».' },
+  { p: 'Voici le théâtre ___ nous jouons la pièce.', ok: ['où'], e: '« Où » remplace un lieu : « nous jouons la pièce dans ce théâtre ».' },
+  { p: 'C’est le clown ___ fait rire les enfants.', ok: ['qui'], e: 'Sujet du verbe « fait » : « qui ».' },
+  { p: 'Le chapiteau ___ nous avons assisté au spectacle est immense.', ok: ['où'], e: '« Où » indique le lieu : « nous avons assisté au spectacle sous ce chapiteau ».' },
+  { p: 'Le jongleur ___ lance les massues est impressionnant.', ok: ['qui'], e: 'Sujet du verbe « lance » : « qui ».' },
+  { p: 'Le spectacle ___ on a vu hier soir était magnifique.', ok: ['que'], e: 'Complément direct : « on a vu le spectacle » : « que ».' },
+  { p: 'C’est le moment ___ le rideau s’ouvre.', ok: ['où'], e: '« Où » indique un moment : « le moment où ».' },
+  { p: 'C’est le clown ___ m’a fait rire hier.', ok: ['qui'], e: 'Sujet du verbe « a fait » : « qui ».' },
+  { p: 'Le film ___ nous avons vu samedi était très long.', ok: ['que'], e: 'Complément direct de « avons vu » : « que ».' },
+  { p: 'La ville ___ se trouve le théâtre est très belle.', ok: ['où'], e: '« Où » remplace un lieu : « le théâtre se trouve dans cette ville ».' }
+];
+function genRel() {
+  const it = pick(REL);
+  return choiceGen(it.p, it.ok, ['qui', 'que', 'où'].filter(x => !it.ok.includes(x)).concat(['dont']), it.e, 2);
+}
+
+/* ---------- Bilan mixte : qui, que, où, dont ---------- */
+const REL_MIX = [
+  { p: 'Le Circus Baobab est un cirque ___ vient de Conakry.', a: 'qui', e: 'Sujet du verbe « vient » : qui.' },
+  { p: 'C’est un spectacle ___ j’ai adoré.', a: 'que', e: 'Complément direct : « j’ai adoré le spectacle » → que.' },
+  { p: 'Conakry est la ville ___ les artistes ont grandi.', a: 'où', e: 'Lieu : « ils ont grandi dans cette ville » → où.' },
+  { p: 'L’eau est une ressource ___ tout le monde a besoin.', a: 'dont', e: '« Avoir besoin de » → dont.' },
+  { p: 'Céline Dion est une chanteuse ___ je suis fan.', a: 'dont', e: '« Être fan de » → dont.' },
+  { p: 'Angèle est une chanteuse ___ a un succès international.', a: 'qui', e: 'Sujet du verbe « a » : qui.' },
+  { p: 'Bref est une série ___ tout le monde regarde.', a: 'que', e: 'Complément direct de « regarde » → que.' },
+  { p: 'Aurillac est la ville ___ a lieu le festival de théâtre de rue.', a: 'où', e: 'Lieu : « le festival a lieu dans cette ville » → où.' },
+  { p: 'C’est le film ___ on parle partout en ce moment.', a: 'dont', e: '« Parler de » → dont.' },
+  { p: 'Le soir ___ je suis allé au cirque, il pleuvait.', a: 'où', e: 'Moment : « le soir où » → où.' },
+  { p: 'Les acrobates ___ font des portés sont très forts.', a: 'qui', e: 'Sujet du verbe « font » : qui.' },
+  { p: 'Le chapiteau ___ tu vois là-bas est immense.', a: 'que', e: 'Complément direct de « vois » → que.' },
+  { p: 'C’est un artiste ___ la voix est exceptionnelle.', a: 'dont', e: '« La voix de l’artiste » → dont.' },
+  { p: 'C’est un concert ___ je me souviens très bien.', a: 'dont', e: '« Se souvenir de » → dont.' },
+  { p: 'Netflix est la plateforme ___ la série est sortie.', a: 'où', e: 'Lieu : « la série est sortie sur cette plateforme » → où.' },
+  { p: 'Le clown ___ les enfants adorent s’appelle Pipo.', a: 'que', e: 'Complément direct : « les enfants adorent le clown » → que.' },
+  { p: 'Les jeunes ___ les parents sont fiers sont devenus artistes.', a: 'dont', e: '« Être fier de » → dont.' },
+  { p: 'C’est l’actrice ___ joue dans Les Trois Mousquetaires.', a: 'qui', e: 'Sujet du verbe « joue » : qui.' }
+];
+function genRelMix() {
+  const it = pick(REL_MIX);
+  return { prompt: it.p, options: ['qui', 'que', 'où', 'dont'], check: v => v === it.a, answerText: it.a, explain: it.e };
+}
+const REL_CLOZE = [
+  'Hier soir, je suis allée voir un spectacle {{dont|que}} tout le monde parle : le Circus Baobab. C’est une compagnie {{qui|que}} vient de Guinée. Les acrobates, {{dont|que}} la plupart ont grandi dans la rue, ont électrisé la salle {{où|dont}} je me trouvais. C’est un spectacle {{que|dont}} je conseille à tous mes amis !',
+  'Angèle est une chanteuse belge {{qui|que}} a un succès international. La chanson {{que|dont}} je préfère s’appelle « Bruxelles je t’aime ». Bruxelles, c’est la ville {{où|dont}} elle a grandi et {{dont|que}} elle parle dans ses chansons.',
+  'Bref est une série {{que|qui}} j’ai découverte sur Netflix. Le personnage principal est un garçon {{qui|que}} raconte sa vie. Le soir {{où|que}} j’ai commencé la saison 2, j’ai tout regardé d’un coup ! C’est une série {{dont|que}} je ne me lasse pas.'
+];
+function genRelCloze() {
+  return {
+    cloze: true,
+    prompt: 'Lis le texte et choisis le bon pronom relatif dans chaque liste.',
+    parts: parseCloze(pick(REL_CLOZE)),
+    explain: 'Qui = sujet. Que = complément direct. Où = lieu ou moment. Dont = remplace « de + nom ».'
+  };
+}
+
+/* ---------- Connecteurs de cause et de temps (fusion) ---------- */
+const CONN_ALL = [
+  { p: '___, je suis resté à la maison. (= parce qu’il pleuvait)', ok: ['Comme il pleuvait'], d: ['Parce qu’il pleuvait', 'Quand il pleuvait'], e: '« Comme » remplace « parce que » en début de phrase.' },
+  { p: '___ je suis arrivé, tout le monde dormait. (= quand)', ok: ['Lorsque'], d: ['Parce que', 'Soudain'], e: '« Lorsque » remplace « quand » (temps).' },
+  { p: 'Soudainement → ___', ok: ['tout à coup', 'tout d’un coup'], d: ['parce que', 'lorsque'], e: '« Tout à coup » et « tout d’un coup » ont le même sens que « soudainement ».' },
+  { p: '« Étant donné qu’elle adore le cinéma, elle y est allée. » peut devenir :', ok: ['Adorant le cinéma, elle y est allée.'], d: ['Adore le cinéma, elle y est allée.', 'Qui adore le cinéma, elle y est allée.'], e: 'Le participe présent exprime la cause, comme « étant donné que ».' },
+  { p: '« Étant donné que » a le même sens que :', ok: ['puisque'], d: ['lorsque', 'tout à coup'], e: '« Étant donné que » et « puisque » introduisent une cause.' },
+  { p: 'Pour remplacer « quand » (temps) de façon plus soutenue, on dit :', ok: ['lorsque'], d: ['comme', 'alors'], e: 'Quand → lorsque.' },
+  { p: 'Pour remplacer « parce que » en début de phrase, on dit :', ok: ['comme'], d: ['quand', 'soudain'], e: 'Parce que → comme (en début de phrase).' },
+  { p: '« Comme il faisait froid, nous sommes restés à la maison. » : le connecteur exprime…', ok: ['la cause'], d: ['le temps', 'l’opposition'], e: '« Comme » en début de phrase exprime la cause.' },
+  { p: '« Lorsque le spectacle a commencé, les spectateurs se sont tus. » : le connecteur exprime…', ok: ['le temps'], d: ['la cause', 'l’opposition'], e: '« Lorsque » exprime le temps : quand.' },
+  { p: '« Soudainement, un cri a retenti. » Une phrase équivalente est :', ok: ['Tout à coup, un cri a retenti.'], d: ['Parce qu’un cri a retenti.', 'Lorsqu’un cri a retenti.'], e: '« Tout à coup » = « soudainement ».' }
+];
+function genConnAll() { const it = pick(CONN_ALL); return choiceGen(it.p, it.ok, it.d, it.e); }
+
+/* ---------- Audio : écoute et dictée (synthèse vocale du navigateur) ---------- */
+const AUDIO_TEMPS = [
+  { s: 'Quand je suis arrivé, le film avait déjà commencé.', t: 'plus-que-parfait' },
+  { s: 'Il faisait beau et les enfants jouaient dans le parc.', t: 'imparfait' },
+  { s: 'Hier, nous sommes allés au cirque.', t: 'passé composé' },
+  { s: 'Elle avait fini son travail avant le dîner.', t: 'plus-que-parfait' },
+  { s: 'Soudain, la lumière s’est éteinte.', t: 'passé composé' },
+  { s: 'Au temps de mon enfance, je regardais les clowns.', t: 'imparfait' },
+  { s: 'Les spectateurs avaient déjà pris leur place.', t: 'plus-que-parfait' },
+  { s: 'Chaque soir, le jongleur répétait son numéro.', t: 'imparfait' }
+];
+const TEMPS = ['imparfait', 'passé composé', 'plus-que-parfait'];
+function genAudioTemps() {
+  const it = pick(AUDIO_TEMPS);
+  return {
+    prompt: 'Écoute la phrase, puis choisis le temps.',
+    speak: it.s,
+    options: shuffle(TEMPS),
+    check: v => v === it.t,
+    answerText: it.t,
+    explain: `Le temps est le ${it.t}.`
+  };
+}
+const DICTEE = [
+  'Le funambule marche sur un fil tendu.',
+  'Les clowns font rire les enfants.',
+  'Je ne regarde pas mes mails en allant à vélo.',
+  'Elle a choisi le film au hasard.',
+  'Le chapiteau était plein à craquer.',
+  'Nous avons appris beaucoup de choses en lisant des livres.'
+];
+function genDictee() {
+  const s = pick(DICTEE);
+  const clean = x => norm(x).replace(/[.,!?]/g, '').trim();
+  return {
+    prompt: 'Écoute la phrase, puis écris-la.',
+    speak: s,
+    check: v => clean(v) === clean(s),
+    answerText: s,
+    explain: 'Attention aux accents, aux accords et à la ponctuation.'
+  };
+}
+
+/* ---------- Phonétique : [ɑ̃] / [ɔ̃] (-ant / -ons ; dans / dont) ---------- */
+const PHON_PAIRS = [
+  ['chantant', 'chantons'], ['parlant', 'parlons'], ['mangeant', 'mangeons'], ['lisant', 'lisons'],
+  ['prenant', 'prenons'], ['écoutant', 'écoutons'], ['dansant', 'dansons'], ['allant', 'allons'],
+  ['partant', 'partons'], ['voyant', 'voyons']
+];
+function genPhonAnt() {
+  const pair = pick(PHON_PAIRS);
+  const isAnt = Math.random() < 0.5;
+  const w = isAnt ? pair[0] : pair[1];
+  const right = isAnt ? '[ɑ̃] -ant' : '[ɔ̃] -ons';
+  return {
+    prompt: 'Écoute le mot. La terminaison est-elle [ɑ̃] (-ant) ou [ɔ̃] (-ons) ?',
+    speak: w,
+    options: ['[ɑ̃] -ant', '[ɔ̃] -ons'],
+    check: v => v === right,
+    answerText: right,
+    explain: `« ${w} » : -ant se prononce [ɑ̃] (participe présent), -ons se prononce [ɔ̃] (verbe à la forme nous).`
+  };
+}
+function genDansDont() {
+  const w = pick(['dans', 'dont']);
+  const right = w === 'dans' ? 'dans [ɑ̃]' : 'dont [ɔ̃]';
+  return {
+    prompt: 'Écoute le mot. Est-ce « dans » ([ɑ̃]) ou « dont » ([ɔ̃]) ?',
+    speak: w,
+    options: ['dans [ɑ̃]', 'dont [ɔ̃]'],
+    check: v => v === right,
+    answerText: right,
+    explain: '« Dans » se prononce [ɑ̃] (voyelle nasale ouverte) ; « dont » se prononce [ɔ̃] (voyelle nasale arrondie).'
+  };
+}
+
+/* ---------- Lexique vu en classe (notes de cours) ---------- */
+const LEX_CIRQUE = [
+  { p: 'Dans un cirque, la personne qui marche sur un fil est le ___.', ok: ['funambule'], d: ['clown', 'dompteur'], e: 'Vu en classe (29/10) : les funambules.' },
+  { p: 'Les artistes qui lancent des balles en l’air sont des ___.', ok: ['jongleurs'], d: ['cracheurs de feu', 'dompteurs'], e: 'Vu en classe (29/10) : les jongleurs.' },
+  { p: 'Le spectacle avec des flammes est fait par des ___.', ok: ['cracheurs de feu'], d: ['clowns', 'funambules'], e: 'Vu en classe (29/10) : les cracheurs de feu.' },
+  { p: 'Le grand toit de toile du cirque est le ___.', ok: ['chapiteau'], d: ['balcon', 'guichet'], e: 'Vu en classe (29/10) : le chapiteau.' },
+  { p: 'Le cirque sert à ___ : passer un bon moment.', ok: ['se divertir'], d: ['se fâcher', 's’ennuyer'], e: 'Vu en classe : se divertir = passer un bon moment, oublier ses problèmes.' },
+  { p: '« Oublier ses problèmes » : « J’___ mes problèmes ! »', ok: ['oublie'], d: ['oublies', 'oubliais'], e: 'Vu en classe : « J’oublie mes problèmes ! » (présent, 1re personne).' },
+  { p: 'Pour dire qu’une histoire ressemble à une autre : « C’est une histoire qui ___ au roman. »', ok: ['ressemble'], d: ['pareil', 'semblable'], e: 'Vu en classe : « ressembler à ». « Pareil » et « la même chose » s’emploient sans verbe.' },
+  { p: 'Une lumière qui n’est pas faible est une lumière ___.', ok: ['lumineuse'], d: ['sombre', 'culte'], e: 'Vu en classe : sombre / lumineux.' },
+  { p: 'Un film qui a des fans passionnés pendant des années est un film ___.', ok: ['culte'], d: ['sombre', 'lumineux'], e: 'Vu en classe : « culte » (un film célèbre et admiré par un public fidèle).' }
+];
+const LEX_CORPS = [
+  { p: 'Pour aller en haut d’un arbre, on ___.', ok: ['grimpe'], d: ['descend', 'tourne'], e: 'Vu en classe (29/10) : grimper.' },
+  { p: 'Quand on passe de l’étage du haut à celui du bas, on ___.', ok: ['descend'], d: ['monte', 'saute'], e: 'Vu en classe : descendre / monter.' },
+  { p: 'Pour passer par-dessus un obstacle, on ___.', ok: ['saute'], d: ['court', 'danse'], e: 'Vu en classe : sauter.' },
+  { p: 'Quelqu’un qui se repose allongé est ___.', ok: ['couché'], d: ['debout', 'assis'], e: 'Vu en classe : être couché(e).' },
+  { p: 'Une personne qui fait de la danse est un ___.', ok: ['danseur'], d: ['dansant', 'dansé'], e: 'Vu en classe : la danse (l’art), le danseur (la personne).' },
+  { p: 'Pour faire un tour sur soi-même, on ___.', ok: ['tourne'], d: ['grimpe', 'descend'], e: 'Vu en classe : tourner.' }
+];
+const LEX_SERIES = [
+  { p: 'Une série est composée de plusieurs saisons, et chaque saison de plusieurs ___.', ok: ['épisodes'], d: ['sorties', 'chapitres'], e: 'Vu en classe (05/11) : des épisodes, des saisons.' },
+  { p: 'Le jour où le film arrive au cinéma, c’est sa ___.', ok: ['sortie'], d: ['saison', 'épisode'], e: 'Vu en classe (05/11) : la sortie du film, de la série.' },
+  { p: 'Dire la fin d’un film à quelqu’un qui ne l’a pas vu : tu le ___.', ok: ['divulgâches'], d: ['choisis', 'affales'], e: 'Vu en classe (05/11) : divulgâcher = révéler la fin ou l’intrigue.' },
+  { p: 'Choisir un film au hasard : « je choisis au ___ ».', ok: ['pif'], d: ['cinéma', 'canapé'], e: 'Vu en classe (05/11) : choisir au pif = choisir au hasard.' },
+  { p: 'Après une longue journée, on est ___ dans son canapé.', ok: ['affalé'], d: ['affalée', 'couché'], e: 'Vu en classe (05/11) : être affalé(e) dans son canapé.' },
+  { p: 'Pour demander si une série est disponible sur une plateforme : « Est-ce que la série est ___ sur Netflix ? »', ok: ['sortie'], d: ['passée', 'couchée'], e: 'Vu en classe (05/11) : « est-ce que la série est sortie sur Netflix ? »' }
+];
+const LEX_CONNECT = [
+  { p: 'Le connecteur de cause en début de phrase qui remplace « parce que » : ___', ok: ['comme'], d: ['quand', 'soudain'], e: 'Vu en classe (03/11) : car / parce que → comme.' },
+  { p: 'Le connecteur de temps qui remplace « quand » : ___', ok: ['lorsque'], d: ['comme', 'alors'], e: 'Vu en classe (03/11) : quand → lorsque.' },
+  { p: 'Le synonyme de « soudainement » : ___', ok: ['tout à coup', 'tout d’un coup'], d: ['parce que', 'lorsque'], e: 'Vu en classe (03/11) : soudainement → tout à coup / tout d’un coup.' }
+];
+function genLexCirque() { const it = pick(LEX_CIRQUE); return choiceGen(it.p, it.ok, it.d, it.e); }
+function genLexCorps() { const it = pick(LEX_CORPS); return choiceGen(it.p, it.ok, it.d, it.e); }
+function genLexSeries() { const it = pick(LEX_SERIES); return choiceGen(it.p, it.ok, it.d, it.e); }
+function genLexConnect() { const it = pick(LEX_CONNECT); return choiceGen(it.p, it.ok, it.d, it.e); }
+
+/* Réactivation : écrire le mot à partir de sa définition (saisie) */
+const LEX_RAPPEL = [
+  { p: 'Artiste qui marche sur un fil : écris le mot.', a: ['funambule'], e: 'Le funambule.' },
+  { p: 'Artiste qui lance et rattrape des objets : écris le mot.', a: ['jongleur'], e: 'Le jongleur.' },
+  { p: 'Grande tente d’un cirque : écris le mot.', a: ['chapiteau'], e: 'Le chapiteau.' },
+  { p: 'Mot de la même famille que « danser » pour la personne : écris le mot.', a: ['danseur'], e: 'Le danseur.' },
+  { p: 'Révéler la fin d’un film : écris le verbe (familier).', a: ['divulgâcher'], e: 'Divulgâcher.' },
+  { p: 'Le contraire de « sombre » : écris l’adjectif.', a: ['lumineux', 'lumineuse'], e: 'Lumineux / lumineuse.' },
+  { p: 'Se déplacer vers le bas (verbe) : écris l’infinitif.', a: ['descendre'], e: 'Descendre.' }
+];
+function genLexRappel() {
+  const it = pick(LEX_RAPPEL);
+  return { prompt: it.p, check: v => it.a.map(norm).includes(norm(v)), answerText: it.a[0], explain: it.e };
+}
+
+/* ---------- Français familier et argot (vu dans l'unité) ---------- */
+const ARGOT = [
+  { p: '« C’est mortel ! » (familier) veut dire…', ok: ['c’est formidable, très bien'], d: ['c’est triste', 'c’est fatigant'], e: '« Mortel » est familier : il renforce un avis très positif.' },
+  { p: '« C’est terrible ! » (familier, avis positif) veut dire…', ok: ['c’est très bien'], d: ['c’est catastrophique', 'c’est trop cher'], e: 'Dans la langue familière, « terrible » peut signifier « très bien ».' },
+  { p: '« Bof ! » exprime…', ok: ['l’indifférence, le peu d’intérêt'], d: ['la joie', 'la colère'], e: '« Bof ! » est une interjection familière : ça ne m’a pas vraiment plu.' },
+  { p: '« Ça me laisse de glace » veut dire…', ok: ['je reste indifférent'], d: ['j’ai très froid', 'je suis furieux'], e: 'Expression familière : rester insensible à quelque chose.' },
+  { p: '« C’est un navet ! » désigne…', ok: ['un film très mauvais'], d: ['un film très drôle', 'un légume'], e: 'Un navet, dans le langage familier du cinéma, c’est un film raté.' },
+  { p: '« Divulgâcher » (familier) veut dire…', ok: ['révéler la fin d’une histoire'], d: ['acheter une place', 'critiquer un acteur'], e: 'Divulgâcher : dévoiler la fin ou l’intrigue, familier et très employé pour les films et séries.' },
+  { p: '« Choisir au pif » (familier) veut dire…', ok: ['choisir au hasard'], d: ['choisir avec soin', 'choisir un ami'], e: '« Au pif » = au hasard, sans réfléchir.' },
+  { p: '« Être affalé dans son canapé » (familier) veut dire…', ok: ['être installé mollement, sans énergie'], d: ['être assis très droit', 'dormir dans son lit'], e: 'Être affalé : se laisser aller, vautré dans un fauteuil ou un canapé.' },
+  { p: '« Tu vas tellement kiffer ! » veut dire…', ok: ['tu vas beaucoup aimer'], d: ['tu vas t’ennuyer', 'tu vas oublier'], e: '« Kiffer » (familier) = aimer beaucoup.' },
+  { p: '« Ça me saoule ! » veut dire…', ok: ['ça m’agace, ça m’énerve'], d: ['ça me fatigue de dormir', 'ça me fait rire'], e: '« Saouler » (familier) ici = agacer, énerver.' },
+  { p: '« Casse-toi ! » veut dire…', ok: ['va-t’en !'], d: ['reviens !', 'tais-toi, je travaille'], e: '« Casse-toi ! » est très familier et brusque : « va-t’en ! ».' },
+  { p: '« Ferme ! » (familier, dans la vidéo) veut dire…', ok: ['tais-toi'], d: ['ferme la porte', 'ferme les yeux'], e: 'Ici, « ferme ! » = tais-toi, arrête de parler.' },
+  { p: '« Un mec » (familier) désigne…', ok: ['un homme, un garçon'], d: ['une voiture', 'un film'], e: '« Un mec » = un garçon ou un homme, très familier.' },
+  { p: '« Un truc » (familier) remplace le plus souvent…', ok: ['une chose'], d: ['une personne', 'une année'], e: '« Un truc » = une chose, un objet, un programme.' },
+  { p: '« Y a combien de saisons ? » (oral familier) correspond à…', ok: ['Il y a combien de saisons ?'], d: ['Il y en a combien, de saisons ?', 'Combien de saisons il y a ?'], e: 'À l’oral, « y a » remplace « il y a ».' },
+  { p: '« Franchement, c’est génial. » : « franchement » signifie…', ok: ['vraiment, sincèrement'], d: ['franc', 'gratuitement'], e: '« Franchement » = vraiment, sincèrement.' },
+  { p: '« Se sentir comme une merde » (familier, vidéo) veut dire…', ok: ['se sentir très mal'], d: ['se sentir très bien', 'se sentir en retard'], e: 'Expression très familière : se sentir très mal, sans énergie.' }
+];
+function genArgot() { const it = pick(ARGOT); return choiceGen(it.p, it.ok, it.d, it.e); }
+
+/* ---------- Circus Baobab (vidéo p.71) ---------- */
+const BAOBAB_VF = [
+  { p: 'Vrai ou faux ? Les artistes du Circus Baobab sont guinéens.', ok: ['Vrai'], e: 'Vrai : la compagnie est née à Conakry, en Guinée.' },
+  { p: 'Vrai ou faux ? Le spectacle parle uniquement de sport.', ok: ['Faux'], e: 'Faux : le spectacle parle de l’eau et de l’environnement.' },
+  { p: 'Vrai ou faux ? Les jeunes du projet viennent de Conakry.', ok: ['Vrai'], e: 'Vrai : Conakry est la capitale de la Guinée.' },
+  { p: 'Vrai ou faux ? Le spectacle parle de la préservation de l’eau.', ok: ['Vrai'], e: 'Vrai : « Yé ! » veut dire « l’eau » en soussou.' },
+  { p: 'Vrai ou faux ? Les artistes utilisent le hip-hop.', ok: ['Vrai'], e: 'Vrai : acrobaties, danse hip-hop et musique urbaine.' },
+  { p: 'Vrai ou faux ? Le Circus Baobab est un cirque classique avec des dompteurs et des animaux.', ok: ['Faux'], e: 'Faux : c’est un cirque contemporain, sans animaux, avec des acrobaties.' },
+  { p: 'Vrai ou faux ? Le premier enjeu du projet est de gagner de l’argent.', ok: ['Faux'], e: 'Faux : le premier enjeu est l’inclusion sociale des jeunes.' },
+  { p: 'Vrai ou faux ? Les artistes sont treize enfants de la rue devenus adultes.', ok: ['Vrai'], e: 'Vrai : « treize enfants de la rue devenus adultes ».' },
+  { p: 'Vrai ou faux ? Ils ont été formés uniquement par des professeurs français.', ok: ['Faux'], e: 'Faux : ils ont été formés par les meilleurs professionnels, africains et français.' },
+  { p: 'Vrai ou faux ? Une spectatrice regrette de ne pas avoir appris le cirque plus jeune.', ok: ['Vrai'], e: 'Vrai : « Ça donne envie, mais c’est un peu tard ! »' },
+  { p: 'Vrai ou faux ? Au départ, le projet a été facile pour les artistes.', ok: ['Faux'], e: 'Faux : « au départ ça n’a pas du tout été facile pour nous ».' },
+  { p: 'Vrai ou faux ? Les parents des artistes sont fiers d’eux aujourd’hui.', ok: ['Vrai'], e: 'Vrai : « même eux, ils sont vraiment fiers de nous ».' }
+];
+function genBaobabVF() {
+  const it = pick(BAOBAB_VF);
+  return { prompt: it.p, options: ['Vrai', 'Faux'], check: v => it.ok.includes(v), answerText: it.ok[0], explain: it.e };
+}
+const BAOBAB_QCM = [
+  { p: 'Le Circus Baobab est un cirque…', ok: ['contemporain, avec des acrobaties'], d: ['classique, avec des clowns et leurs numéros', 'ambulant, avec des animaux'], e: 'Cirque contemporain : acrobaties, pyramides humaines, danse.' },
+  { p: 'Quel est le premier enjeu du projet ?', ok: ['l’inclusion sociale des jeunes'], d: ['gagner de l’argent', 'voyager en Europe'], e: 'La compagnie forme des jeunes, souvent sans école, aux arts du cirque.' },
+  { p: 'Quelle est la thématique du spectacle « Yé ! » ?', ok: ['l’eau et l’environnement'], d: ['le sport de haut niveau', 'l’histoire de la Guinée au Moyen Âge'], e: '« Yé » signifie « l’eau » : le spectacle parle de l’accès à l’eau et de l’urgence climatique.' },
+  { p: 'D’où viennent les artistes ?', ok: ['de Guinée, en Afrique de l’Ouest'], d: ['du Sénégal', 'de Belgique'], e: 'Ils viennent de Guinée (Conakry).' },
+  { p: 'Les pyramides humaines et les portés sont des ___.', ok: ['acrobaties'], d: ['jongleries', 'tours de magie'], e: 'Ce sont des figures acrobatiques.' },
+  { p: 'Pour ces jeunes, le cirque est surtout…', ok: ['un métier et un avenir'], d: ['un simple loisir du dimanche', 'une obligation scolaire'], e: '« Ce métier peut donner de l’avenir. »' },
+  { p: 'Combien de dates le spectacle est-il programmé ?', ok: ['plus de 400'], d: ['plus de 40', 'plus de 4 000'], e: '« Programmé sur plus de 400 dates. »' },
+  { p: 'Quel est le deuxième enjeu du projet ?', ok: ['faire découvrir la culture guinéenne au public'], d: ['vendre des billets d’avion', 'apprendre le français aux artistes'], e: 'Le deuxième enjeu : faire découvrir au public amiénois la culture guinéenne.' },
+  { p: 'Les jeunes artistes viennent, pour la plupart…', ok: ['de la rue'], d: ['d’une grande école de cirque', 'de familles d’artistes'], e: '« Ces jeunes qui viennent, pour la plupart, de la rue. »' },
+  { p: 'Ils ont été formés au hip-hop et aux arts ___.', ok: ['circassiens'], d: ['plastiques', 'culinaires'], e: 'Circassien = qui concerne le cirque.' },
+  { p: 'Le spectacle parle d’environnement « sans jamais oublier… »', ok: ['l’homme'], d: ['la musique', 'le public'], e: '« Les enjeux de la planète, mais sans jamais oublier l’homme. »' },
+  { p: 'Pour les artistes de Conakry, ce spectacle est…', ok: ['une consécration'], d: ['un échec', 'une punition'], e: 'Une consécration : la reconnaissance d’un travail.' },
+  { p: 'Les artistes se sentent aujourd’hui…', ok: ['l’exemple de tout un peuple'], d: ['oubliés par leur pays', 'fatigués du cirque'], e: '« Nous sommes l’exemple de tout un peuple, de toute une nation. »' }
+];
+
+/* Lexique du reportage */
+const BAOBAB_LEX = [
+  { p: 'Les artistes ont « électrisé » la scène : ils l’ont…', ok: ['enthousiasmée, rendue très vivante'], d: ['éteinte', 'abîmée'], e: 'Électriser un public : le transporter d’enthousiasme.' },
+  { p: 'Des figures acrobatiques « de haute volée » sont…', ok: ['de très haut niveau'], d: ['dangereuses pour le public', 'faites en avion'], e: 'De haute volée = de grande qualité, de haut niveau.' },
+  { p: 'Des « prouesses » techniques, ce sont…', ok: ['des exploits'], d: ['des erreurs', 'des répétitions'], e: 'Une prouesse = un exploit.' },
+  { p: 'Un show « percutant » est un show…', ok: ['qui frappe, qui marque le public'], d: ['qui fait du bruit avec des percussions seulement', 'très calme'], e: 'Percutant = fort, qui produit un grand effet.' },
+  { p: 'Le spectacle « dénonce » un enjeu planétaire : il le…', ok: ['critique publiquement'], d: ['cache', 'célèbre'], e: 'Dénoncer = montrer et critiquer publiquement un problème.' },
+  { p: 'Les « portés » sont des figures où…', ok: ['un acrobate en soulève un autre'], d: ['on porte un costume', 'on jongle avec des massues'], e: 'Porté = figure où un artiste porte un partenaire.' },
+  { p: 'Le « main-à-main » est un numéro…', ok: ['d’équilibre à deux, appuyés sur les mains'], d: ['de magie', 'de clown'], e: 'Main-à-main : deux acrobates en équilibre, mains contre mains.' },
+  { p: 'Un spectacle « engagé » veut…', ok: ['faire passer un message'], d: ['seulement faire rire', 'vendre un produit'], e: 'Engagé = qui défend une cause.' },
+  { p: '« Ça donne envie ! » exprime…', ok: ['le désir d’essayer'], d: ['la peur', 'l’ennui'], e: 'Ça donne envie = on a envie de faire pareil.' },
+  { p: '« C’était super impressionnant ! » est une appréciation…', ok: ['positive'], d: ['négative', 'neutre'], e: 'Super impressionnant : avis très positif, registre familier.' }
+];
+function genBaobabLex() { const it = pick(BAOBAB_LEX); return choiceGen(it.p, it.ok, it.d, it.e); }
+function genBaobabQcm() { const it = pick(BAOBAB_QCM); return choiceGen(it.p, it.ok, it.d, it.e); }
+
+/* Les thématiques du spectacle vivant : à quoi sert le cirque ? */
+const SPECT_THEMES = [
+  { p: '« Le cirque permet aux jeunes de trouver leur place dans la société. » Cette phrase parle de…', ok: ['l’inclusion sociale'], d: ['l’environnement', 'la compétition sportive'], e: 'Trouver sa place dans la société = l’inclusion sociale.' },
+  { p: '« Le spectacle alerte le public sur le manque d’eau. » Cette phrase parle de…', ok: ['l’environnement'], d: ['l’inclusion sociale', 'la mode'], e: 'Le manque d’eau est un enjeu environnemental.' },
+  { p: '« Au cirque, j’oublie mes problèmes. » Cette phrase parle de…', ok: ['se divertir'], d: ['s’engager', 's’informer'], e: 'Oublier ses problèmes, passer un bon moment : c’est se divertir.' },
+  { p: 'Un spectacle qui défend une cause est un spectacle ___.', ok: ['engagé'], d: ['ennuyeux', 'enregistré'], e: 'Un spectacle engagé fait passer un message.' },
+  { p: 'Le spectacle vivant, c’est un spectacle…', ok: ['joué en direct devant un public'], d: ['regardé sur une plateforme', 'enregistré en studio'], e: 'Spectacle vivant : théâtre, cirque, danse, concert… en direct.' },
+  { p: 'Le cirque contemporain mélange souvent les arts. Ici, il mélange acrobaties et ___.', ok: ['danse hip-hop'], d: ['peinture à l’huile', 'opéra classique'], e: 'Le Circus Baobab mélange acrobaties, danse hip-hop et musique urbaine.' },
+  { p: 'Quand un spectacle se joue dans plusieurs villes et pays, on dit qu’il part en ___.', ok: ['tournée'], d: ['vacances', 'coulisses'], e: 'Partir en tournée : jouer dans plusieurs villes.' },
+  { p: 'Le public applaudit debout à la fin : c’est une ___.', ok: ['ovation'], d: ['avant-première', 'bande-annonce'], e: 'Une ovation : des applaudissements enthousiastes.' }
+];
+function genSpectThemes() { const it = pick(SPECT_THEMES); return choiceGen(it.p, it.ok, it.d, it.e); }
+
+/* Texte à trous : résumé du reportage avec la grammaire de l'unité */
+const BAOBAB_CLOZE = [
+  'Le Circus Baobab est un cirque contemporain {{dont|que}} les artistes viennent de Conakry. {{Ayant|Avoir}} grandi dans la rue, ces jeunes ont trouvé un métier {{en|par}} apprenant les arts du cirque. Avant de monter sur scène, ils {{avaient|ont}} travaillé pendant des années.',
+  'Dans « Yé ! », les acrobates parlent de l’eau, une ressource {{dont|que}} tout le monde a besoin. {{En|Pour}} dansant sur une musique hip-hop, ils construisent des pyramides humaines. Le public, {{applaudissant|applaudissants}} très fort, se lève à la fin du spectacle.',
+  'Quand le spectacle est arrivé en France, les acrobates {{avaient déjà répété|répétaient déjà}} pendant des mois à Conakry. C’est un spectacle {{dont|que}} on se souvient longtemps : il fait réfléchir tout en {{divertissant|diverti}} le public.'
+];
+function genBaobabCloze() {
+  return {
+    cloze: true,
+    prompt: 'Lis le résumé du reportage et choisis la forme juste dans chaque liste.',
+    parts: parseCloze(pick(BAOBAB_CLOZE)),
+    explain: 'Dont = de + nom. Gérondif = en + participe présent. Le participe présent est invariable. Plus-que-parfait = action antérieure.'
+  };
+}
+
+/* ---------- Vocabulaire art et culture (liste de référence) ---------- */
+const ART = [
+  { p: 'Quand le public applaudit très fort à la fin, c’est une ___.', ok: ['ovation'], d: ['coulisse', 'affiche'], e: 'Une ovation : des applaudissements très enthousiastes.' },
+  { p: 'Un spectacle qui ne marche pas et que le public n’aime pas fait un ___.', ok: ['flop'], d: ['vernissage', 'casting'], e: 'Faire un flop : échouer.' },
+  { p: 'L’espace derrière la scène, invisible pour le public, s’appelle les ___.', ok: ['coulisses'], d: ['balcons', 'rangs'], e: 'Les coulisses : l’arrière-scène.' },
+  { p: 'Le ___ est l’étage élevé de la salle de théâtre.', ok: ['balcon'], d: ['décor', 'coulisse'], e: 'Le balcon : la partie haute de la salle.' },
+  { p: 'La personne qui dirige les acteurs pendant une pièce est le ___.', ok: ['metteur en scène'], d: ['spectateur', 'comédien'], e: 'Le metteur en scène dirige la mise en scène.' },
+  { p: 'Un auteur de pièces de théâtre est un ___.', ok: ['dramaturge'], d: ['romancier', 'poète'], e: 'Le dramaturge écrit pour le théâtre.' },
+  { p: 'Une vidéo très courte qui fait la promotion d’un film est une ___.', ok: ['bande-annonce'], d: ['critique', 'avant-première'], e: 'La bande-annonce : extrait court qui présente un film.' },
+  { p: 'Un film de plus de soixante minutes est un ___.', ok: ['long métrage'], d: ['court métrage', 'documentaire'], e: 'Un long métrage dépasse la durée d’un court métrage.' },
+  { p: 'La soirée d’ouverture d’une exposition de tableaux s’appelle un ___.', ok: ['vernissage'], d: ['casting', 'flop'], e: 'Le vernissage : l’inauguration d’une exposition.' },
+  { p: 'Un tableau qui représente des fruits ou des objets est une ___.', ok: ['nature morte'], d: ['galerie d’art', 'affiche'], e: 'Une nature morte : un tableau d’objets ou de fruits.' },
+  { p: 'Un tableau dans lequel l’artiste se représente lui-même est un ___.', ok: ['autoportrait'], d: ['paysage', 'portrait de groupe'], e: 'Un autoportrait : l’artiste se peint lui-même.' },
+  { p: 'Pour choisir les acteurs d’un film, on organise un ___.', ok: ['casting'], d: ['flop', 'vernissage'], e: 'Un casting : la sélection des comédiens.' },
+  { p: 'La personne qui regarde un spectacle est un ___.', ok: ['spectateur'], d: ['metteur en scène', 'dramaturge'], e: 'Le spectateur assiste au spectacle.' },
+  { p: 'Un journal où l’on confie ses sentiments au quotidien est un ___.', ok: ['journal intime'], d: ['roman policier', 'récit de voyage'], e: 'Le journal intime : écrit personnel au quotidien.' }
+];
+function genArt() { const it = pick(ART); return choiceGen(it.p, it.ok, it.d, it.e); }
+
+const EXTRA = [
+  { film: 'eloge', title: 'Faire l’éloge d’un artiste', desc: 'Le vocabulaire de la fiche Céline Dion.', kind: 'choice', gen: genEloge,
+    rule: 'Trouve le mot qui correspond à la définition.' },
+  { film: 'baobab', title: 'Vrai ou faux ?', desc: 'Ce que dit le reportage.', kind: 'choice', gen: genBaobabVF,
+    rule: 'Souviens-toi du reportage sur le Circus Baobab et réponds vrai ou faux.' },
+  { film: 'baobab', title: 'Comprendre le reportage', desc: 'Artistes, enjeux, thématique.', kind: 'choice', gen: genBaobabQcm,
+    rule: 'Choisis la réponse qui correspond au reportage.' },
+  { film: 'baobab', title: 'Le lexique du reportage', desc: 'Haute volée, prouesses, percutant…', kind: 'choice', gen: genBaobabLex,
+    rule: 'Les mots et expressions entendus dans le reportage.' },
+  { film: 'baobab', title: 'Résumé à trous', desc: 'Le reportage avec la grammaire de l’unité.', kind: 'cloze', gen: genBaobabCloze,
+    rule: 'Un résumé du reportage : choisis dont ou que, le gérondif, le participe présent, le plus-que-parfait.' },
+  { film: 'baobab', title: 'Le spectacle vivant : à quoi ça sert ?', desc: 'Se divertir, s’engager, s’intégrer.', kind: 'choice', gen: genSpectThemes,
+    rule: 'Le cirque et le spectacle vivant divertissent, mais ils font aussi passer des messages.' },
+  { film: 'art', title: 'Vocabulaire de la scène et de l’exposition', desc: 'Ovation, coulisses, balcon, vernissage…', kind: 'choice', gen: genArt,
+    rule: 'Trouve le mot qui correspond à la définition, dans le vocabulaire art et culture.' },
+  { film: 'eloge', title: 'Critique positive ou négative', desc: 'Avis sur un spectacle ou un film.', kind: 'choice', gen: genCritique,
+    rule: 'Repère le mot ou la phrase qui exprime l’avis.' }
+];
+const FILMS = { baobab: 'Le Circus Baobab · vidéo p.71', eloge: 'Dossier 1 · Le spectacle vivant', art: 'Vocabulaire · Art et culture' };
+MODES.push(...EXTRA);
+
+/* ---------- Moteur ---------- */
+let mode = null, q = null, last = '', good = 0, total = 0;
+
+function updateScore() {
+  el('score').textContent = total ? `${good} bonne${good > 1 ? 's' : ''} réponse${good > 1 ? 's' : ''} sur ${total}` : 'Commence quand tu veux';
+}
+
+function openMode(m) {
+  mode = m; good = 0; total = 0; last = '';
+  el('menu-wrap').hidden = true;
+  el('play').hidden = false;
+  el('mode-title').textContent = m.title;
+  el('rule').textContent = m.rule;
+  ask();
+  el('play').scrollIntoView({ block: 'start' });
+}
+
+function home() {
+  mode = null; q = null;
+  el('play').hidden = true;
+  el('menu-wrap').hidden = false;
+}
+
+function ask() {
+  let g = null;
+  for (let i = 0; i < 8; i++) { g = mode.gen(); if (g.prompt !== last) break; }
+  last = g.prompt;
+  q = g;
+  q.done = false;
+  if (g.cloze) { askCloze(g); return; }
+
+  el('prompt').textContent = g.prompt;
+  const fb = el('feedback');
+  fb.textContent = ''; fb.className = 'feedback';
+  el('next').hidden = true;
+
+  el('listen').hidden = !g.speak;
+  const isChoice = !!g.options;
+  const box = el('choices');
+  box.innerHTML = '';
+  box.className = 'choices';
+  box.hidden = !isChoice;
+  el('form').hidden = isChoice;
+  if (isChoice) {
+    g.options.forEach(o => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'choice';
+      b.textContent = o;
+      b.addEventListener('click', () => answer(o));
+      box.appendChild(b);
+    });
+  } else {
+    const input = el('input');
+    input.value = '';
+    input.disabled = false;
+    input.focus();
+  }
+  updateScore();
+}
+
+function answer(val) {
+  if (!q || q.done) return;
+  q.done = true;
+  total++;
+  const ok = q.check(val);
+  if (ok) good++;
+
+  const fb = el('feedback');
+  fb.className = 'feedback ' + (ok ? 'good' : 'bad');
+  fb.textContent = (ok ? 'Bravo. ' : 'Pas tout à fait. ') + (q.explain || '');
+  if (!ok && q.answerText) fb.textContent += ' Réponse : ' + q.answerText + '.';
+
+  if (q.options) {
+    [...el('choices').children].forEach(b => {
+      b.disabled = true;
+      if (q.check(b.textContent)) b.classList.add('right');
+      else if (b.textContent === val) b.classList.add('wrong');
+    });
+  } else {
+    el('input').disabled = true;
+  }
+  el('next').hidden = false;
+  el('next').focus();
+  updateScore();
+}
+
+function askCloze(g) {
+  const box = el('choices');
+  box.innerHTML = '';
+  box.hidden = false;
+  box.className = 'cloze';
+  el('form').hidden = true;
+  el('next').hidden = true;
+  el('listen').hidden = true;
+  const fb = el('feedback');
+  fb.textContent = ''; fb.className = 'feedback';
+  el('prompt').textContent = g.prompt;
+
+  const p = document.createElement('p');
+  p.className = 'story';
+  g.selects = [];
+  g.parts.forEach(part => {
+    if (typeof part === 'string') { p.appendChild(document.createTextNode(part)); return; }
+    const s = document.createElement('select');
+    s.setAttribute('aria-label', 'Choix du temps');
+    const ph = document.createElement('option');
+    ph.value = ''; ph.textContent = '…';
+    s.appendChild(ph);
+    shuffle([part.ok, part.alt]).forEach(v => {
+      const o = document.createElement('option');
+      o.value = v; o.textContent = v;
+      s.appendChild(o);
+    });
+    p.appendChild(s);
+    g.selects.push({ sel: s, ok: part.ok });
+  });
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'primary';
+  btn.textContent = 'Vérifier le texte';
+  btn.addEventListener('click', () => checkCloze(btn));
+  box.append(p, btn);
+  updateScore();
+}
+
+function checkCloze(btn) {
+  if (!q || q.done) return;
+  q.done = true;
+  btn.hidden = true;
+  let right = 0;
+  const wrong = [];
+  q.selects.forEach(s => {
+    const ok = s.sel.value === s.ok;
+    if (ok) right++; else wrong.push(s.ok);
+    s.sel.disabled = true;
+    s.sel.classList.add(ok ? 'right' : 'wrong');
+  });
+  const n = q.selects.length;
+  total++;
+  const all = right === n;
+  if (all) good++;
+  const fb = el('feedback');
+  fb.className = 'feedback ' + (all ? 'good' : 'bad');
+  fb.textContent = all
+    ? 'Parfait, tout est juste. '
+    : `${right} sur ${n} juste. Réponses : ${wrong.join(', ')}. `;
+  fb.textContent += q.explain;
+  el('next').hidden = false;
+  el('next').focus();
+  updateScore();
+}
+
+/* ---------- Initialisation ---------- */
+function tile(m) {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'tile';
+  const s1 = document.createElement('strong');
+  s1.textContent = m.title;
+  const s2 = document.createElement('span');
+  s2.textContent = m.desc;
+  b.append(s1, s2);
+  b.addEventListener('click', () => openMode(m));
+  return b;
+}
+const gridThemes = el('grid-themes');
+const gridExtraits = el('grid-extraits');
+MODES.forEach(m => { if (!m.film) gridThemes.appendChild(tile(m)); });
+Object.keys(FILMS).forEach(f => {
+  const h = document.createElement('h3');
+  h.className = 'film';
+  h.textContent = FILMS[f];
+  const g = document.createElement('div');
+  g.className = 'menu';
+  MODES.filter(m => m.film === f).forEach(m => g.appendChild(tile(m)));
+  gridExtraits.append(h, g);
+});
+function showTab(name) {
+  const themes = name === 'themes';
+  el('t-themes').setAttribute('aria-selected', String(themes));
+  el('t-extraits').setAttribute('aria-selected', String(!themes));
+  el('tab-themes').hidden = !themes;
+  el('tab-extraits').hidden = themes;
+}
+el('t-themes').addEventListener('click', () => showTab('themes'));
+el('t-extraits').addEventListener('click', () => showTab('extraits'));
+
+el('back').addEventListener('click', home);
+el('next').addEventListener('click', ask);
+el('listen').addEventListener('click', () => {
+  if (!q || !q.speak) return;
+  try {
+    if (!('speechSynthesis' in window)) throw new Error('no tts');
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(q.speak);
+    u.lang = 'fr-FR';
+    u.rate = 0.9;
+    speechSynthesis.speak(u);
+  } catch (e) {
+    el('feedback').className = 'feedback bad';
+    el('feedback').textContent = 'Le son n’est pas disponible sur cet appareil.';
+  }
+});
+el('form').addEventListener('submit', e => {
+  e.preventDefault();
+  if (q && q.done) ask(); else answer(el('input').value);
+});
+updateScore();
+</script>
+
+</body></html>
